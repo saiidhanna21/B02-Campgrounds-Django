@@ -1,33 +1,95 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
+<div class="container mt-4">
+	<div class="row">
+		<div class="col-md-5 mb-4">
+			<!-- Search Form -->
+			<form method="get" action="{% url 'campgrounds' %}" class="form-inline">
+				<div class="input-group w-100">
+					<input
+						type="text"
+						name="search"
+						class="form-control"
+						placeholder="Search for campgrounds by title"
+						value="{{ request.GET.search|default:'' }}" />
+					<div class="input-group-append">
+						<button type="submit" class="btn btn-primary ml-2">Search</button>
+					</div>
+				</div>
+			</form>
+		</div>
 
-{% block content %}
-<div class="container">
-    <div class="row">
-        {% if campgrounds %}
-            {% for camp in campgrounds %}
-                <div class="col-md-6 mb-4">
-                    <div class="card camp-card">
-                        <img src="{{ camp.image.url }}" alt="Camp Image" class="card-img-top camp-image">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ camp.title }}</h5>
-                            <p class="card-text"><strong>Location:</strong> {{ camp.location }}</p>
-                            <p class="card-text"><strong>Price:</strong> {{ camp.price }}</p>
-                            <p class="card-text"><strong>Rating:</strong> {{ camp.average_rating }}</p>
-                            <p class="card-text"><strong>Owner:</strong> {{ camp.user.username }}</p>
-                            <a href="{% url 'showCampground' camp.id %}" class="btn btn-primary">View Details</a>
-                            {% if user.is_authenticated and camp.user == user %}
-                                <a href="{% url 'editCampground' camp.id %}" class="btn btn-warning">Edit</a>
-                                <a href="{% url 'deleteCampground' camp.id %}" class="btn btn-danger">Delete</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="col-12 no-camps">
-                <p>No campgrounds available. Add a new one to get started!</p>
-            </div>
-        {% endif %}
-    </div>
+		<div class="col-md-7 mb-4">
+			<!-- Filtering and Sorting Options -->
+			<form method="get" action="{% url 'campgrounds' %}" class="form-inline">
+				<div class="row">
+					<div class="col-md-3 form-group mb-3">
+						<select name="owner" class="form-control">
+							<option value="">Filter by Owner</option>
+							{% for owner in owners %}
+							<option value="{{ owner }}">{{ owner }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<div class="col-md-3 form-group mb-3">
+						<select name="rating" class="form-control">
+							<option value="">Sort by Rating</option>
+							<option value="low_to_high">Low to High</option>
+							<option value="high_to_low">High to Low</option>
+						</select>
+					</div>
+					<div class="col-md-3 form-group mb-3">
+						<select name="price" class="form-control">
+							<option value="">Sort by Price</option>
+							<option value="low_to_high">Low to High</option>
+							<option value="high_to_low">High to Low</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<button type="submit" class="btn btn-primary">Apply Filters</button>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<!-- Display Campgrounds -->
+		{% if campgrounds %} {% for camp in campgrounds %}
+		<div class="col-md-6 mb-4">
+			<div class="card camp-card">
+				<img
+					src="{{ camp.image.url }}"
+					alt="Camp Image"
+					class="card-img-top camp-image" />
+				<div class="card-body">
+					<h5 class="card-title">{{ camp.title }}</h5>
+					<p class="card-text">
+						<strong>Location:</strong> {{ camp.location }}
+					</p>
+					<p class="card-text"><strong>Price:</strong> {{ camp.price }}</p>
+					<p class="card-text">
+						<strong>Rating:</strong> {{ camp.average_rating }}
+					</p>
+					<p class="card-text">
+						<strong>Owner:</strong> {{ camp.user.username }}
+					</p>
+					<a href="{% url 'showCampground' camp.id %}" class="btn btn-primary"
+						>View Details</a
+					>
+					{% if user.is_authenticated and camp.user == user %}
+					<a href="{% url 'editCampground' camp.id %}" class="btn btn-warning"
+						>Edit</a
+					>
+					<a href="{% url 'deleteCampground' camp.id %}" class="btn btn-danger"
+						>Delete</a
+					>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		{% endfor %} {% else %}
+		<div class="col-12 no-camps">
+			<p>No campgrounds available. Add a new one to get started!</p>
+		</div>
+		{% endif %}
+	</div>
 </div>
 {% endblock %}

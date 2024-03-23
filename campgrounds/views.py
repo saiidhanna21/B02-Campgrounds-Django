@@ -8,6 +8,7 @@ from .models import Campgrounds,Reviews, Booking, Availability
 from .forms import SignUpForm, LoginForm, CampgroundForm, ReviewForm, BookingForm, AvailabilityForm
 from django.contrib import messages
 import json
+from django.db.models import Avg
 
 def home(request):
     return render(request,'home.html')
@@ -57,8 +58,34 @@ def logout(request):
     return redirect('home')
 
 def campgrounds(request):
+    query = request.GET.get('search', '')  
+    owner_filter = request.GET.get('owner')
+    rating_sort = request.GET.get('rating')
+    price_sort = request.GET.get('price')
+
     campgrounds = Campgrounds.objects.all()
-    return render(request,'campgrounds.html',{'campgrounds':campgrounds})
+
+    if query:
+        campgrounds = campgrounds.filter(title__istartswith=query)
+
+    if owner_filter:
+        campgrounds = campgrounds.filter(user__username=owner_filter)
+
+    if rating_sort:
+        if rating_sort == 'low_to_high':
+            campgrounds = campgrounds.order_by('average_rating')
+        elif rating_sort == 'high_to_low':
+            campgrounds = campgrounds.order_by('-average_rating')
+
+    if price_sort:
+        if price_sort == 'low_to_high':
+            campgrounds = campgrounds.order_by('price')
+        elif price_sort == 'high_to_low':
+            campgrounds = campgrounds.order_by('-price')
+
+    owners = User.objects.filter(campgrounds__in=campgrounds).values_list('username', flat=True).distinct()
+
+    return render(request, 'campgrounds.html', {'campgrounds': campgrounds, 'owners': owners})
 
 def show_campground(request, camp_id):
     campground = Campgrounds.objects.get(id=camp_id)
@@ -91,6 +118,7 @@ def add_campground(request):
                 date = campground.start_date + timedelta(days=i)
                 availability = Availability(campground_id=campground, date=date, num_camps_available=campground.total_camps)
                 availability.save()
+            messages.success(request, "Successfully added new campground!")
             return redirect('campgrounds')
     return render(request, 'addCampground.html', {'form': form})
 
@@ -108,6 +136,7 @@ def edit_campground(request, camp_id):
                 messages.error(request, "Number of available camps must be at least 5.")
                 return render(request, 'editCampground.html', {'form': form})
             form.save()
+            messages.success(request, "Successfully Edited a new campground!")
             return redirect('campgrounds')
     else:
         form = CampgroundForm(instance=camp)
