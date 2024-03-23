@@ -1,5 +1,4 @@
-{% extends 'base.html' %} 
-{% block title %} Add Campground {% endblock title %}
+{% extends 'base.html' %} {% block title %} Add Campground {% endblock title %}
 {% block content %}
 <div class="container">
 	<div class="row justify-content-center">
@@ -38,24 +37,4 @@
 	</div>
 </div>
 
-<script>
-	function validateDates() {
-		var startDate = document.getElementById('id_start_date').value;
-		var endDate = document.getElementById('id_end_date').value;
-
-		if (startDate >= endDate) {
-			alert('End date must be after the start date.');
-			return false; 
-        }
-		return true;
-	}
-
-	document
-		.getElementById('campgroundForm')
-		.addEventListener('submit', function (event) {
-			if (!validateDates()) {
-				event.preventDefault();
-			}
-		});
-</script>
 {% endblock content %}

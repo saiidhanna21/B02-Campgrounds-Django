@@ -17,15 +17,14 @@ def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            # Automatically generate username, name, and password
             user = User.objects.create_user(username=form.cleaned_data['username'],
                                              email=form.cleaned_data['email'],
                                              password=form.cleaned_data['password'])
             user.first_name = form.cleaned_data['first_name']
             user.last_name = form.cleaned_data['last_name']
             user.save()
-            login(request, user)  # Automatically log in the user after signup
-            return redirect('home')  # Redirect to home page after successful signup
+            login(request, user)
+            return redirect('campgrounds')
     else:
         form = SignUpForm()
     return render(request, 'signup.html', {'form': form})
@@ -36,18 +35,18 @@ def login_view(request):
         if form.is_valid():
             username_or_email = form.cleaned_data['username_or_email']
             password = form.cleaned_data['password']
-            # Check if username_or_email is an email address
+
             if '@' in username_or_email:
                 kwargs = {'email': username_or_email}
             else:
                 kwargs = {'username': username_or_email}
-            # Authenticate user by username or email
+
             user = authenticate(request, **kwargs, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('home')  # Redirect to home page after successful login
+                messages.success(request, "Welcome Back! You have successfully logged in.")
+                return redirect('home') 
             else:
-                # Add a custom error message
                 messages.error(request, "Invalid username/email or password")
     else:
         form = LoginForm()
@@ -93,11 +92,10 @@ def show_campground(request, camp_id):
     available = Availability.objects.all()
     return render(request, 'campground.html', {'camp': campground, 'reviews': reviews, 'available': available})
 
-from django.contrib import messages
-
 def add_campground(request):
     form = CampgroundForm()
     if request.user.is_authenticated == False:
+        messages.error(request, "You must be signed in to perform such action!")
         return HttpResponseForbidden("You are not authorized to add a campground.")
     if request.method == 'POST':
         form = CampgroundForm(request.POST, request.FILES)
@@ -118,13 +116,14 @@ def add_campground(request):
                 date = campground.start_date + timedelta(days=i)
                 availability = Availability(campground_id=campground, date=date, num_camps_available=campground.total_camps)
                 availability.save()
-            messages.success(request, "Successfully added new campground!")
+            messages.success(request, "You have successfully added a new campground!")
             return redirect('campgrounds')
     return render(request, 'addCampground.html', {'form': form})
 
 def edit_campground(request, camp_id):
     camp = Campgrounds.objects.get(id=camp_id)
     if camp.user != request.user:
+        messages.error(request, "You must be signed in to perform such action!")
         return HttpResponseForbidden("You are not authorized to edit this campground.")
     if request.method == 'POST':
         form = CampgroundForm(request.POST, request.FILES, instance=camp)
@@ -136,7 +135,8 @@ def edit_campground(request, camp_id):
                 messages.error(request, "Number of available camps must be at least 5.")
                 return render(request, 'editCampground.html', {'form': form})
             form.save()
-            messages.success(request, "Successfully Edited a new campground!")
+            message = f"You have successfully edited {camp.title} campground!"
+            messages.success(request, message)
             return redirect('campgrounds')
     else:
         form = CampgroundForm(instance=camp)
@@ -145,11 +145,14 @@ def edit_campground(request, camp_id):
 def delete_campground(request,camp_id):
     camp = Campgrounds.objects.get(id=camp_id)
     camp.delete()
+    message = f"You have successfully deleted {camp.title} campground!"
+    messages.success(request, message)
     return redirect(campgrounds)
        
 def add_review(request, camp_id):
     campground = get_object_or_404(Campgrounds, id=camp_id)
     if not request.user.is_authenticated:
+        messages.error(request, "You must be signed in to perform such action!")
         return HttpResponseForbidden("You are not authorized to add a review.")
     form = ReviewForm()
     if request.method == "POST":
@@ -166,13 +169,14 @@ def add_review(request, camp_id):
             avg_rating = total_rating / len(reviews) if len(reviews) > 0 else 0
             campground.average_rating = avg_rating
             campground.save()
-
+            messages.success(request, "You have succesfully added a review!")
             return redirect('showCampground', camp_id=camp_id)
     return render(request, 'addReview.html', {'form': form})
 
 def edit_review(request, camp_id, review_id):
     review = Reviews.objects.get(id=review_id)
     if review.user != request.user:
+        messages.error(request, "You must be signed in to perform such action!")
         return HttpResponseForbidden("You are not authorized to edit this review.")
     form = ReviewForm(instance=review)
     if request.method == "POST":
@@ -187,18 +191,20 @@ def edit_review(request, camp_id, review_id):
             campground = Campgrounds.objects.get(id=camp_id)
             campground.average_rating = avg_rating
             campground.save()
-
+            messages.success(request, "You have succesfully edited this review!")
             return redirect('showCampground', camp_id=camp_id)
     return render(request, 'editReview.html', {'form': form})
 
 def delete_review(request,camp_id,review_id):
     review = Reviews.objects.get(id=review_id)
     review.delete()
+    messages.success(request, "You have succesfully deleted this review!")
     return redirect('showCampground',camp_id=camp_id)
        
 def booked_campgrounds(request):
     booked_camps = Booking.objects.all()
     if request.user.is_authenticated==False:
+        messages.error(request, "You must be signed in to perform such action!")
         return HttpResponseForbidden("You are not authorized to view the booked campgrounds.")
     return render(request,'bookedCampgrounds.html',{'booked_camps':booked_camps})     
 
@@ -207,10 +213,11 @@ def book_campground(request, camp_id):
     campground = Campgrounds.objects.get(id=camp_id)
     
     if not request.user.is_authenticated:
+        messages.error(request, "You must be signed in to perform such action!")
         return HttpResponseForbidden("You are not authorized to book a campground.")
 
     available_dates = Availability.objects.filter(campground_id=campground, num_camps_available__gt=0).values_list('date', flat=True)
-    available_dates = [d.isoformat() for d in available_dates]  # Convert dates to string format for JavaScript
+    available_dates = [d.isoformat() for d in available_dates]
 
     bookingForm = BookingForm(request.POST or None)
 
@@ -245,6 +252,8 @@ def book_campground(request, camp_id):
             current_date += timedelta(days=1)
         
         booking.save()
+        message = f"You have succesfully booked {campground.title} campground!"
+        messages.success(request, message)
         return redirect('campgrounds')
     
     return render(request, 'bookCampground.html', {'form': bookingForm, 'camp_id': camp_id, 'available_dates': json.dumps(available_dates)})

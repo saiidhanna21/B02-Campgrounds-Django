@@ -31,24 +31,4 @@
     </div>
 </div>
 
-<script>
-    // Function to validate start_date and end_date
-    function validateDates() {
-        var startDate = document.getElementById('id_start_date').value;
-        var endDate = document.getElementById('id_end_date').value;
-        
-        if (startDate >= endDate) {
-            alert("End date must be after the start date.");
-            return false; // Prevent form submission
-        }
-        return true; // Allow form submission
-    }
-
-    // Attach event listener to form submission
-    document.getElementById('campgroundForm').addEventListener('submit', function(event) {
-        if (!validateDates()) {
-            event.preventDefault(); // Prevent form submission if validation fails
-        }
-    });
-</script>
 {% endblock %}
