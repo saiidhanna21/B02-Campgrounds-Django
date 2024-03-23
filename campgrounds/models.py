@@ -17,8 +17,8 @@ class Campgrounds(models.Model):
     total_camps = models.IntegerField()
     start_date = models.DateField()
     end_date = models.DateField()
-    image = models.ImageField(upload_to='images/', null=True, blank=True)
-    average_rating = models.FloatField(default=0)  # New field for storing average rating
+    image = models.ImageField(upload_to='images/')
+    average_rating = models.FloatField(default=0)
     
     def __str__(self):
         return self.title
@@ -26,7 +26,7 @@ class Campgrounds(models.Model):
 class Reviews(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     campground_id = models.ForeignKey('Campgrounds', on_delete=models.CASCADE)
-    rating = models.CharField(max_length=10, choices=RATING_CHOICES, default='0')  # Change default value to '0'
+    rating = models.CharField(max_length=10, choices=RATING_CHOICES, default='0')
     text_description = models.TextField()
 
     def __str__(self):
@@ -47,7 +47,6 @@ class Booking(models.Model):
     end_date = models.DateField()
     nb_persons = models.IntegerField()
     f_cancel = models.BooleanField()
-    f_confirmed = models.BooleanField()
     
     def __str__(self):
         return self.nb_persons

@@ -1,88 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    {% include 'base.html' %}
-    <title>Add A Booking</title>
-    <style>
-        .alert-danger {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            padding: 0.75rem 1.25rem;
-            margin-bottom: 1rem;
-            border: 1px solid transparent;
-            border-radius: 0.25rem;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h1 class="card-title">Add A Booking</h1>
-                    </div>
-                    <div class="card-body">
-                        {% if user.is_authenticated %}
-                            {% block content %}
-                                <form id="bookingForm" action="" method="post">
-                                    {% csrf_token %}
-                                    {{ form }}
-                                    <div style="margin-top: 20px;">
-                                        <button type="submit" class="btn btn-primary">Submit</button>
-                                    </div>
-                                </form>
-                            {% endblock content %}
-                        {% else %}
-                            <p class="text-danger">You need to be logged in or signed up to access this page.</p>
-                            <div class="auth-links">
-                                <a href="{% url 'login' %}" class="btn btn-success">Login</a>
-                                <a href="{% url 'signup' %}" class="btn btn-info">Sign Up</a>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="card-footer">
-                        <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+	<head>
+		{% include 'base.html' %}
+		<title>Add A Booking</title>
+		<style>
+			.alert-danger {
+				color: #721c24;
+				background-color: #f8d7da;
+				border-color: #f5c6cb;
+				padding: 0.75rem 1.25rem;
+				margin-bottom: 1rem;
+				border: 1px solid transparent;
+				border-radius: 0.25rem;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-md-8">
+					<div class="card">
+						<div class="card-header">
+							<h1 class="card-title">Add A Booking</h1>
+						</div>
+						<div class="card-body">
+							{% if user.is_authenticated %} {% block content %}
+							<form id="bookingForm" action="" method="post">
+								{% csrf_token %} {{ form.as_p }}
+								<div style="margin-top: 20px">
+									<button type="submit" class="btn btn-primary">Submit</button>
+								</div>
+							</form>
+							{% endblock content %} {% else %}
+							<p class="text-danger">
+								You need to be logged in or signed up to access this page.
+							</p>
+							<div class="auth-links">
+								<a href="{% url 'login' %}" class="btn btn-success">Login</a>
+								<a href="{% url 'signup' %}" class="btn btn-info">Sign Up</a>
+							</div>
+							{% endif %}
+						</div>
+						<div class="card-footer">
+							<a href="{% url 'home' %}" class="btn btn-primary"
+								>Back to Home</a
+							>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var availableDates = JSON.parse('{{ available_dates|escapejs }}');
-            var startDateInput = document.querySelector("#id_start_date");
-            var endDateInput = document.querySelector("#id_end_date");
-            var bookingForm = document.querySelector("#bookingForm");
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				var availableDates = JSON.parse('{{ available_dates|escapejs }}');
+				var startDateInput = document.querySelector('#id_start_date');
+				var endDateInput = document.querySelector('#id_end_date');
+				var bookingForm = document.querySelector('#bookingForm');
 
-            function setAvailableDates() {
-                startDateInput.setAttribute("min", availableDates[0]);
-                startDateInput.setAttribute("max", availableDates[availableDates.length - 1]);
-                endDateInput.setAttribute("min", availableDates[0]);
-                endDateInput.setAttribute("max", availableDates[availableDates.length - 1]);
-            }
+				function setAvailableDates() {
+					startDateInput.setAttribute('min', availableDates[0]);
+					startDateInput.setAttribute(
+						'max',
+						availableDates[availableDates.length - 1]
+					);
+					endDateInput.setAttribute('min', availableDates[0]);
+					endDateInput.setAttribute(
+						'max',
+						availableDates[availableDates.length - 1]
+					);
+					startDateInput.setAttribute('onchange', 'setEndDateOptions()');
+					endDateInput.setAttribute('onchange', 'setEndDateOptions()');
+					setEndDateOptions(); // Call to initially set end date options based on start date
+				}
 
-            function validateDates() {
-                var startDate = new Date(startDateInput.value);
-                var endDate = new Date(endDateInput.value);
-                
-                if (endDate < startDate) {
-                    alert("End date must be after or equal to the start date.");
-                    return false;
-                }
-                return true;
-            }
+				function setEndDateOptions() {
+					var startDate = new Date(startDateInput.value);
+					var endDateOptions = endDateInput.querySelectorAll('option');
+					for (var i = 0; i < endDateOptions.length; i++) {
+						var endDate = new Date(endDateOptions[i].value);
+						if (
+							endDate < startDate ||
+							availableDates.indexOf(endDate.toISOString().slice(0, 10)) === -1
+						) {
+							endDateOptions[i].disabled = true;
+						} else {
+							endDateOptions[i].disabled = false;
+						}
+					}
+				}
 
-            bookingForm.addEventListener("submit", function(event) {
-                if (!validateDates()) {
-                    event.preventDefault();
-                }
-            });
+				function validateDates() {
+					var startDate = new Date(startDateInput.value);
+					var endDate = new Date(endDateInput.value);
 
-            setAvailableDates();
-        });
-    </script>
-</body>
+					if (endDate < startDate) {
+						alert('End date must be after or equal to the start date.');
+						return false;
+					}
+					return true;
+				}
+
+				bookingForm.addEventListener('submit', function (event) {
+					if (!validateDates()) {
+						event.preventDefault();
+					}
+				});
+
+				// Call setEndDateOptions when either start date or end date is changed
+				startDateInput.addEventListener('input', setEndDateOptions);
+				endDateInput.addEventListener('input', setEndDateOptions);
+
+				setAvailableDates();
+			});
+		</script>
+	</body>
 </html>

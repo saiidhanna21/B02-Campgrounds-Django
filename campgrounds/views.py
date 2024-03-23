@@ -174,10 +174,9 @@ def booked_campgrounds(request):
     return render(request,'bookedCampgrounds.html',{'booked_camps':booked_camps})     
 
 
-
-
 def book_campground(request, camp_id):
     campground = Campgrounds.objects.get(id=camp_id)
+    
     if not request.user.is_authenticated:
         return HttpResponseForbidden("You are not authorized to book a campground.")
 
@@ -185,12 +184,13 @@ def book_campground(request, camp_id):
     available_dates = [d.isoformat() for d in available_dates]  # Convert dates to string format for JavaScript
 
     bookingForm = BookingForm(request.POST or None)
+
     if request.method == 'POST' and bookingForm.is_valid():
         booking = bookingForm.save(commit=False)
         booking.user = request.user
         booking.campground_id = campground 
         booking.f_cancel = False
-        booking.f_confirmed = False 
+        
         start_date = booking.start_date
         end_date = booking.end_date
         current_date = start_date
@@ -198,17 +198,24 @@ def book_campground(request, camp_id):
             availability = Availability.objects.get(campground_id=campground, date=current_date)
             available_camps = availability.num_camps_available
             booked_camps = booking.nb_persons
+            
             if booked_camps > available_camps:
                 return HttpResponseForbidden("Not enough camps available for the specified date: {}".format(current_date))
+            
             current_date += timedelta(days=1)
+        
         current_date = start_date
         while current_date <= end_date:
             availability = Availability.objects.get(campground_id=campground, date=current_date)
             available_camps = availability.num_camps_available
             booked_camps = booking.nb_persons
+            
             availability.num_camps_available -= booked_camps
             availability.save()
+            
             current_date += timedelta(days=1)
-            booking.save()
+        
+        booking.save()
         return redirect('campgrounds')
+    
     return render(request, 'bookCampground.html', {'form': bookingForm, 'camp_id': camp_id, 'available_dates': json.dumps(available_dates)})

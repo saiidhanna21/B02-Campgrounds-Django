@@ -1,60 +1,61 @@
-{% extends 'base.html' %}
-
-{% block title %}
-    Add Campground
-{% endblock title %}
-
+{% extends 'base.html' %} 
+{% block title %} Add Campground {% endblock title %}
 {% block content %}
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h1 class="card-title">Add Campground</h1>
-                </div>
-                    {% if form.total_camps.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ form.total_camps.errors }}
-                    </div>
-                        {% endif %}
-                <div class="card-body">
-                    {% if user.is_authenticated %}
-                            <form id="campgroundForm" action="" method="post" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                {{ form.as_p }}
-                                <input type="submit" class="btn btn-primary" value="Submit">
-                            </form>
-                    {% else %}
-                        <p class="text-danger">You need to be logged in or signed up to access this page.</p>
-                        <div class="auth-links">
-                            <a href="{% url 'login' %}" class="btn btn-success">Login</a>
-                            <a href="{% url 'signup' %}" class="btn btn-info">Sign Up</a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="row justify-content-center">
+		<div class="col-md-7">
+			<div class="card">
+				<div class="card-header">
+					<h1 class="card-title">Add Campground</h1>
+				</div>
+				{% if form.total_camps.errors %}
+				<div class="alert alert-danger" role="alert">
+					{{ form.total_camps.errors }}
+				</div>
+				{% endif %}
+				<div class="card-body">
+					{% if user.is_authenticated %}
+					<form
+						id="campgroundForm"
+						action=""
+						method="post"
+						enctype="multipart/form-data">
+						{% csrf_token %} {{ form.as_p }}
+						<input type="submit" class="btn btn-primary" value="Submit" />
+					</form>
+					{% else %}
+					<p class="text-danger">
+						You need to be logged in or signed up to access this page.
+					</p>
+					<div class="auth-links">
+						<a href="{% url 'login' %}" class="btn btn-success">Login</a>
+						<a href="{% url 'signup' %}" class="btn btn-info">Sign Up</a>
+					</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <script>
-    // Function to validate start_date and end_date
-    function validateDates() {
-        var startDate = document.getElementById('id_start_date').value;
-        var endDate = document.getElementById('id_end_date').value;
-        
-        if (startDate >= endDate) {
-            alert("End date must be after the start date.");
-            return false; // Prevent form submission
-        }
-        return true; // Allow form submission
-    }
+	function validateDates() {
+		var startDate = document.getElementById('id_start_date').value;
+		var endDate = document.getElementById('id_end_date').value;
 
-    // Attach event listener to form submission
-    document.getElementById('campgroundForm').addEventListener('submit', function(event) {
-        if (!validateDates()) {
-            event.preventDefault(); // Prevent form submission if validation fails
+		if (startDate >= endDate) {
+			alert('End date must be after the start date.');
+			return false; 
         }
-    });
+		return true;
+	}
+
+	document
+		.getElementById('campgroundForm')
+		.addEventListener('submit', function (event) {
+			if (!validateDates()) {
+				event.preventDefault();
+			}
+		});
 </script>
 {% endblock content %}
