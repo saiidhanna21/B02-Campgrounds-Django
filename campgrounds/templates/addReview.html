@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'base.html' %}
+    <title>Add Review</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="card-title">Add Review</h1>
+                    </div>
+                    <div class="card-body">
+                        {% if user.is_authenticated %}
+                            {% block content %}
+                                <form action="" method="post">
+                                    {% csrf_token %}
+                                    {{ form.as_p }}
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </form>
+                            {% endblock content %}
+                        {% else %}
+                            <p class="text-danger">You need to be logged in or signed up to access this page.</p>
+                            <div class="auth-links">
+                                <a href="{% url 'login' %}" class="btn btn-success">Login</a>
+                                <a href="{% url 'signup' %}" class="btn btn-info">Sign Up</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <img src="{{ camp.image.url }}" alt="Camp Image" class="img-fluid camp-image">
+
+                <div class="card-body">
+                    <h1 class="card-title">Welcome to camp {{ camp.title }}</h1>
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>Location:</strong> {{ camp.location }}</li>
+                        <li class="list-group-item"><strong>Price:</strong> {{ camp.price }}</li>
+                        <li class="list-group-item"><strong>Rating:</strong> {{ camp.average_rating }}</li>
+                        <li class="list-group-item"><strong>Start Date:</strong> {{ camp.start_date }}</li>
+                    </ul>
+
+                    <h2 class="mt-4">Book Campground</h2>
+                    <a href="{% url 'bookCampground' camp.id %}" class="btn btn-primary">Book Camp</a>
+                    <h1>
+                        Available Campgrounds
+                    </h1>
+                    <ul>
+                        {% for a in available%}
+                        <li>{{a.date}} - {{a.num_camps_available}}</li>
+                        {%endfor%}
+                    </ul>
+                    <h2 class="mt-4">Reviews</h2>
+                    <ul class="list-group">
+                        {% for review in reviews %}
+                            <li class="list-group-item">
+                                {{ review.text_description }}
+                                {% if user.is_authenticated and review.user == user %}
+                                    <a href="{% url 'editReview' camp.id review.id %}" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="{% url 'deleteReview' camp.id review.id %}" class="btn btn-danger btn-sm">Delete</a>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <a href="{% url 'addReview' camp.id %}" class="btn btn-primary mt-4">Add Review</a>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

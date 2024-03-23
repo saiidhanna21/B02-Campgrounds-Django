@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Home
+{% endblock title %}
+
+{% block content %}
+<div class="container">
+    {% if user.is_authenticated %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Welcome, {{ user.username }}!</h1>
+                <ul class="list-unstyled">
+                    <li><a href="{% url 'campgrounds' %}" class="btn btn-primary btn-block">Campgrounds</a></li>
+                    <li><a href="{% url 'bookedCampgrounds' %}" class="btn btn-primary btn-block">Booked Campgrounds</a></li>
+                    <li><a href="{% url 'logout' %}" class="btn btn-danger btn-block">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Welcome to Our Site</h1>
+                <p class="mb-4">Please sign up or log in to continue:</p>
+                <div>
+                    <h2 class="card-title">Sign Up</h2>
+                    <form action="{% url 'signup' %}" method="post">
+                        {% csrf_token %}
+                        {{ signup_form.as_p }}
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    </form>
+                    <p class="mt-4">Already have an account? <a href="{% url 'login' %}" class="btn btn-link">Login</a></p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

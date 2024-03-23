@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        {% if campgrounds %}
+            {% for camp in campgrounds %}
+                <div class="col-md-6 mb-4">
+                    <div class="card camp-card">
+                        <img src="{{ camp.image.url }}" alt="Camp Image" class="card-img-top camp-image">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ camp.title }}</h5>
+                            <p class="card-text"><strong>Location:</strong> {{ camp.location }}</p>
+                            <p class="card-text"><strong>Price:</strong> {{ camp.price }}</p>
+                            <p class="card-text"><strong>Rating:</strong> {{ camp.average_rating }}</p>
+                            <p class="card-text"><strong>Owner:</strong> {{ camp.user.username }}</p>
+                            <a href="{% url 'showCampground' camp.id %}" class="btn btn-primary">View Details</a>
+                            {% if user.is_authenticated and camp.user == user %}
+                                <a href="{% url 'editCampground' camp.id %}" class="btn btn-warning">Edit</a>
+                                <a href="{% url 'deleteCampground' camp.id %}" class="btn btn-danger">Delete</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 no-camps">
+                <p>No campgrounds available. Add a new one to get started!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

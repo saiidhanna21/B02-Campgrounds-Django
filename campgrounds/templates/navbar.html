@@ -1,0 +1,25 @@
+<!-- navbar.html -->
+<nav class="navbar sticky-top navbar-expand-lg bg-dark navbar-dark">
+    <div class="container-fluid">
+        <span class="navbar-brand">B03_Campgrounds</span>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="navbar-nav mr-auto">
+                <a class="nav-link" href="{% url 'home' %}">Home</a>
+                <a class="nav-link" href="{% url 'campgrounds' %}">Campgrounds</a>
+                <a class="nav-link" href="{% url 'addCampground' %}">New Campground</a>
+                <a href="{% url 'bookedCampgrounds' %}" class="nav-link">Booked Campgrounds</a>
+            </div>
+            <div class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="nav-link">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="nav-link">Login</a>
+                    <a href="{% url 'signup' %}" class="nav-link">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
